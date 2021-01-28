@@ -1,4 +1,4 @@
-package DeliveriesV2
+package deliveries
 
 import (
 	"context"
@@ -12,18 +12,18 @@ var (
 	ErrNotFound        = errors.New("not found")
 )
 
-type traceLogRepository struct {
+type DeliveryRepository struct {
 	mtx  sync.RWMutex
 	conn Connection
 }
 
-func NewTraceLogRepository(conn Connection) TraceLogRepository {
-	return &traceLogRepository{
+func NewDeliveryRepository(conn Connection) DeliveryRepository {
+	return &deliveryRepository{
 		conn: conn,
 	}
 }
 
-func (r *traceLogRepository) FindAll(ctx context.Context) ([]Delivery, error) {
+func (r *deliveryRepository) FindAll(ctx context.Context) ([]Delivery, error) {
 	r.mtx.RLock()
 	defer r.mtx.RUnlock()
 	rows, err := r.conn.DB.Query("SELECT id, orderId, status, to, finalPrice,address,description FROM tDely")
@@ -45,42 +45,4 @@ func (r *traceLogRepository) FindAll(ctx context.Context) ([]Delivery, error) {
 	}
 
 	return tDely, nil
-}
-
-func (r *traceLogRepository) Create(ctx context.Context, td Delivery) error {
-	r.mtx.Lock()
-	defer r.mtx.Unlock()
-	err := r.conn.DB.QueryRow("INSERT INTO tDely(id,orderId, status, to, finalPrice, address, description) VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING id",
-	td.ID,
-	td.OrderID,
-	td.Status,
-	td.To,
-	td.FinalPrice,
-	td.Address,
-	td.Description
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-func (r *traceLogRepository) Delete(ctx context.Context, td Delivery) error {
-	r.mtx.Lock()
-	defer r.mtx.Unlock()
-	err := r.conn.DB.QueryRow("DELETE FROM tDely WHERE id = id",
-	td.ID,
-		td.OrderID,
-		td.Status,
-		td.To,
-		td.FinalPrice,
-		td.Address,
-		td.Description
-
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

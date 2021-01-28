@@ -1,10 +1,10 @@
-package DeliveriesV2
+package deliveries
 
 type FindAllRequest struct {
 }
 
 type CreateRequest struct {
-	TDely TraceLog `json:"td"`
+	TDely Delivery `json:"td"`
 }
 
 type FindAllResponse struct {
