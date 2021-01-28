@@ -1,4 +1,4 @@
-package advert
+package deliveries
 
 import (
 	"context"
@@ -7,20 +7,18 @@ import (
 )
 
 type Endpoints struct {
-	ListarEndPoint      endpoint.Endpoint
-	ModificarEndPoint   endpoint.Endpoint
-	EliminarEndPoint    endpoint.Endpoint
-	GetByIdEndpoint     endpoint.Endpoint
-	GetByStatusEndpoint endpoint.Endpoint
+	ListarEndPoint    endpoint.Endpoint
+	ModificarEndPoint endpoint.Endpoint
+	EliminarEndPoint  endpoint.Endpoint
+	GetByIdEndpoint   endpoint.Endpoint
 }
 
 func MakeEndpoints(s AdvertService) Endpoints {
 	return Endpoints{
-		ListarEndPoint:      MakeListEndpoint(s),
-		ModificarEndPoint:   MakeUpdateEndpoint(s),
-		EliminarEndPoint:    MakeDeleteEndpoint(s),
-		GetByIdEndpoint:     MakeGetByIdEndpoint(s),
-		GetByStatusEndpoint: MakeGetByIdEndpoint(s),
+		ListarEndPoint:    MakeListEndpoint(s),
+		ModificarEndPoint: MakeUpdateEndpoint(s),
+		EliminarEndPoint:  MakeDeleteEndpoint(s),
+		GetByIdEndpoint:   MakeGetByIdEndpoint(s),
 	}
 }
 
@@ -52,12 +50,5 @@ func MakeGetByIdEndpoint(s AdvertService) endpoint.Endpoint { //busqueda por id 
 		req := request.(GetByIdRequest)
 		ad, e := s.GetById(ctx, req.ID)
 		return GetByIdResponse{Advert: ad, Err: e}, nil
-	}
-}
-func MakeGetByStatusEndpoint(s AdvertService) endpoint.Endpoint { //busqueda por id endpoint
-	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		req := request.(GetByStatusRequest)
-		ad, e := s.GetByStatus(ctx, req.Status)
-		return GetByStatusResponse{Advert: ad, Err: e}, nil
 	}
 }

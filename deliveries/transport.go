@@ -1,4 +1,4 @@
-package advert
+package deliveries
 
 import (
 	"context"

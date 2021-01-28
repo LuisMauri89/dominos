@@ -1,4 +1,4 @@
-package advent
+package deliveries
 
 import (
 	"context"
@@ -85,16 +85,6 @@ func (r *inMemoryRepository) GetById(ctx context.Context, id string) (Delivery, 
 	return ad, nil
 }
 
-func (r *inMemoryRepository) GetByStatus(ctx context.Context, id string) (Delivery, error) {
-	r.mtx.RLock()
-	defer r.mtx.RUnlock()
-	ad, ok := r.ads[status]
-	if !ok {
-		return Delivery{}, ErrNotFound
-	}
-	return ad, nil
-}
-
 type advertService struct {
 	repository AdvertRepository
 }
@@ -141,13 +131,6 @@ func (s *advertService) Delete(ctx context.Context, id string) error {
 
 func (s *advertService) GetById(ctx context.Context, id string) (Delivery, error) {
 	ad, err := s.repository.GetById(ctx, id)
-	if err != nil {
-		return ad, err
-	}
-	return ad, nil
-}
-func (s *advertService) GetByStatus(ctx context.Context, status string) (Delivery, error) {
-	ad, err := s.repository.GetByStatus(ctx, status)
 	if err != nil {
 		return ad, err
 	}

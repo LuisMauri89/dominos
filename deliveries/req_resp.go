@@ -1,4 +1,4 @@
-package advent
+package deliveries
 
 type ListRequest struct {
 }

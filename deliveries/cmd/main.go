@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"vendo/advert"
 
 	"github.com/go-kit/kit/log"
 )
@@ -43,7 +42,4 @@ func main() {
 
 	logger.Log("exit", <-errs)
 
-	func ObtainDelivery(){
-		
-	}
 }
