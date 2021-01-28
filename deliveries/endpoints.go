@@ -1,4 +1,4 @@
-package deliveries
+package DeliveriesV2
 
 import (
 	"context"
@@ -7,25 +7,25 @@ import (
 )
 
 type Endpoints struct {
-	ListarEndPoint    endpoint.Endpoint
-	ModificarEndPoint endpoint.Endpoint
-	EliminarEndPoint  endpoint.Endpoint
-	GetByIdEndpoint   endpoint.Endpoint
+	FindAllEndpoint endpoint.Endpoint
+	UpdateEndpoint  endpoint.Endpoint
+	DeleteEndpoint  endpoint.Endpoint
+	GetByIdEndpoint endpoint.Endpoint
 }
 
-func MakeEndpoints(s AdvertService) Endpoints {
+func MakeEndpoints(s TraceLogService) Endpoints {
 	return Endpoints{
-		ListarEndPoint:    MakeListEndpoint(s),
-		ModificarEndPoint: MakeUpdateEndpoint(s),
-		EliminarEndPoint:  MakeDeleteEndpoint(s),
-		GetByIdEndpoint:   MakeGetByIdEndpoint(s),
+		FindAllEndpoint: makeFindAllEndpoint(s),
+		UpdateEndpoint:  MakeUpdateEndpointEndpoint(s),
+		DeleteEndpoint:  MakeDeleteEndpointEndpoint(s),
+		GetByIdEndpoint: MakeGetByIdEndpointEndpoint(s),
 	}
 }
 
-func MakeListEndpoint(s AdvertService) endpoint.Endpoint { //crear lista de endpoint
+func makeFindAllEndpoint(s AdvertService) endpoint.Endpoint { //crear lista de endpoint
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		ads, e := s.List(ctx)
-		return ListResponse{Ads: ads, Err: e}, nil
+		Dely, e := s.List(ctx)
+		return ListResponse{Dely: dely, Err: e}, nil
 	}
 }
 

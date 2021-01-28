@@ -1,36 +1,24 @@
-package deliveries
+package DeliveriesV2
 
-type ListRequest struct {
+type FindAllRequest struct {
 }
 
-type UpdateRequest struct {
-	ID     string
-	Advert Delivery
+type CreateRequest struct {
+	TDely TraceLog `json:"td"`
 }
 
-type DeleteRequest struct {
-	ID string
+type FindAllResponse struct {
+	TDely []Delivery `json:"tdely"`
+	Err   error      `json:"error,omitempty"`
 }
 
-type GetByIdRequest struct {
-	ID string
-}
-type GetByStatus struct {
-	Status string
-}
+func (r FindAllResponse) error() error { return r.Err }
 
-type ListResponse struct {
-	Ads map[string]Delivery `json:"ads"`
-	Err error               `json:"error,omitempty"`
-}
-
-func (r ListResponse) error() error { return r.Err }
-
-type UpdateResponse struct {
+type CreateResponse struct {
 	Err error `json:"error,omitempty"`
 }
 
-func (r UpdateResponse) error() error { return r.Err }
+func (r CreateResponse) error() error { return r.Err }
 
 type DeleteResponse struct {
 	Err error `json:"error,omitempty"`
@@ -38,16 +26,8 @@ type DeleteResponse struct {
 
 func (r DeleteResponse) error() error { return r.Err }
 
-type GetByIdResponse struct {
-	Advert Delivery `json:"advert"`
-	Err    error    `json:"error,omitempty"`
+type UpdateResponse struct {
+	Err error `json:"error,omitempty"`
 }
 
-func (r GetByIdResponse) error() error { return r.Err }
-
-type GetByStatusResponse struct {
-	Advert Delivery `json:"advert"`
-	Err    error    `json:"error,omitempty"`
-}
-
-func (r GetByStatusResponse) error() error { return r.Err }
+func (r UpdateResponse) error() error { return r.Err }

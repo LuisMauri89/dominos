@@ -8,13 +8,14 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/dominos/logs"
 	"github.com/go-kit/kit/log"
+	"github.com/joho/godotenv"
 )
 
 func main() {
-
 	var (
-		httpAddr = flag.String("http.addr", ":8080", "HTTP listen address")
+		httpAddr = flag.String("port", ":3030", "HTTP listen address")
 	)
 	flag.Parse()
 
@@ -25,21 +26,32 @@ func main() {
 		logger = log.With(logger, "caller", log.DefaultCaller)
 	}
 
-	adService := advert.NewService(advert.NewInMemoryRepository())
-	httpHandler := advert.MakeHTTPHandler(adService, logger)
+	err := godotenv.Load(os.ExpandEnv("../.env"))
+	if err != nil {
+		panic("missing os environment vars.")
+	}
 
-	errs := make(chan error)
+	conn := logs.NewConnection(os.Getenv("LOGS_DB_USERNAME"), os.Getenv("LOGS_DB_PASSWORD"), os.Getenv("LOGS_DB_NAME"), logger)
+	defer conn.DB.Close()
+	tlogsepository := logs.NewTraceLogRepository(conn)
+	var tlogsService logs.TraceLogService
+	{
+		tlogsService = logs.NewTraceLogService(tlogsepository, logger)
+		tlogsService = logs.NewLoggingTraceLogServiceMiddleware(logger)(tlogsService)
+	}
+	httpHandler := logs.MakeHTTPHandler(tlogsService, logger)
+
+	errors := make(chan error)
 	go func() {
-		c := make(chan os.Signal)
-		signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
-		errs <- fmt.Errorf("%s", <-c)
+		osSignal := make(chan os.Signal)
+		signal.Notify(osSignal, syscall.SIGINT, syscall.SIGTERM)
+		errors <- fmt.Errorf("%s", <-osSignal)
 	}()
 
 	go func() {
 		logger.Log("transport", "HTTP", "addr", *httpAddr)
-		errs <- http.ListenAndServe(*httpAddr, httpHandler)
+		errors <- http.ListenAndServe(*httpAddr, httpHandler)
 	}()
 
-	logger.Log("exit", <-errs)
-
+	logger.Log("exit", <-errors)
 }

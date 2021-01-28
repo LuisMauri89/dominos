@@ -1,4 +1,4 @@
-package deliveries
+package DeliveriesV2
 
 import (
 	"context"
@@ -20,28 +20,28 @@ func NewLoggingTraceLogServiceMiddleware(logger log.Logger) LoggingTraceLogServi
 	}
 }
 
-func (mw *loggingTraceLogServiceMiddleware) ListarTodo(ctx context.Context) ([]TraceLog, error) {
+func (mw *loggingTraceLogServiceMiddleware) FindAll(ctx context.Context) ([]Delivery, error) {
 	defer func(begin time.Time) {
 		mw.logger.Log("method", "FindAllTlogs", "took", time.Since(begin))
 	}(time.Now())
 	return mw.TraceLogService.FindAll(ctx)
 }
 
-func (mw *loggingTraceLogServiceMiddleware) Create(ctx context.Context, tdeli TraceLog) error {
+func (mw *loggingTraceLogServiceMiddleware) Create(ctx context.Context, td Delivery) error {
 	defer func(begin time.Time) {
-		mw.logger.Log("method", "CreateTdeli", "took", time.Since(begin))
+		mw.logger.Log("method", "CreateTlog", "took", time.Since(begin))
 	}(time.Now())
-	return mw.TraceLogService.Create(ctx, tlog)
+	return mw.TraceLogService.Create(ctx, td)
 }
-func (mw *loggingTraceLogServiceMiddleware) Delete(ctx context.Context, tdeli TraceLog) error {
+func (mw *loggingTraceLogServiceMiddleware) Delete(ctx context.Context, td Delivery) error {
 	defer func(begin time.Time) {
-		mw.logger.Log("method", "DeleteTdeli", "took", time.Since(begin))
+		mw.logger.Log("method", "DeleteTlog", "took", time.Since(begin))
 	}(time.Now())
-	return mw.TraceLogService.Delete(ctx, tlog)
+	return mw.TraceLogService.Delete(ctx, td)
 }
-func (mw *loggingTraceLogServiceMiddleware) Update(ctx context.Context, tdeli TraceLog) error {
+func (mw *loggingTraceLogServiceMiddleware) Update(ctx context.Context, td Delivery) error {
 	defer func(begin time.Time) {
-		mw.logger.Log("method", "UpdateTdeli", "took", time.Since(begin))
+		mw.logger.Log("method", "UpdateTlog", "took", time.Since(begin))
 	}(time.Now())
-	return mw.TraceLogService.Update(ctx, tlog)
+	return mw.TraceLogService.Update(ctx, td)
 }

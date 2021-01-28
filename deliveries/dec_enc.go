@@ -1,4 +1,4 @@
-package deliveries
+package DeliveriesV2
 
 import (
 	"context"
@@ -30,14 +30,14 @@ func decodeFindAllRequest(_ context.Context, r *http.Request) (request interface
 
 func decodeCreateRequest(_ context.Context, r *http.Request) (request interface{}, err error) {
 	var req CreateRequest
-	if e := json.NewDecoder(r.Body).Decode(&req.Tlog); e != nil {
+	if e := json.NewDecoder(r.Body).Decode(&req.td); e != nil {
 		return nil, e
 	}
 	return req, nil
 }
 
 func encodeResponse(ctx context.Context, w http.ResponseWriter, response interface{}) error {
-	if e, ok := response.(errors); ok && e.error() != nil {
+	if e, ok := response.(errorer); ok && e.error() != nil {
 		encodeError(ctx, e.error(), w)
 		return nil
 	}

@@ -1,4 +1,4 @@
-package deliveries
+package DeliveriesV2
 
 type Delivery struct {
 	ID          string `json:"id"`
