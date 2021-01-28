@@ -1,4 +1,4 @@
-package deliveries
+package logs
 
 import (
 	"database/sql"
