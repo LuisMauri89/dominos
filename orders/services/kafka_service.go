@@ -58,3 +58,31 @@ func produce(ctx context.Context, value []byte, key string) {
 		logger.Fatal("kafka writer failed.")
 	}
 }
+
+func StartKafkaListener(ctx context.Context, listener chan Payload) {
+	go consume(ctx, listener)
+}
+
+func consume(ctx context.Context, listener chan Payload) {
+	logger := log.New(os.Stdout, "kafka reader: ", 0)
+	reader := kafka.NewReader(kafka.ReaderConfig{
+		Brokers: []string{brokerAddress},
+		Topic:   topic,
+		GroupID: groupID,
+		Logger:  logger,
+	})
+	for {
+		payloadMsg, err := reader.ReadMessage(ctx)
+		if err != nil {
+			logger.Fatal("could not read message " + err.Error())
+		}
+
+		payload := Payload{}
+		err = json.Unmarshal([]byte(string(payloadMsg.Value)), &payload)
+		if err != nil {
+			logger.Fatal("could not parse message " + err.Error())
+		}
+		listener <- payload
+		logger.Println("received: ", string(payloadMsg.Value))
+	}
+}
