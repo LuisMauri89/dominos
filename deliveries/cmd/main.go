@@ -15,7 +15,7 @@ import (
 
 func main() {
 	var (
-		httpAddr = flag.String("port", ":3030", "HTTP listen address")
+		httpAddr = flag.String("port", ":8080", "HTTP listen address")
 	)
 	flag.Parse()
 
