@@ -4,16 +4,15 @@ import (
 	"context"
 
 	"dominos.com/orders/models"
-	"dominos.com/orders/repositories"
 	"github.com/go-kit/kit/log"
 )
 
 type orderItemService struct {
-	repository repositories.OrderItemRepository
+	repository OrderItemRepository
 	logger     log.Logger
 }
 
-func NewOrderItemService(repository repositories.OrderItemRepository, logger log.Logger) OrderItemService {
+func NewOrderItemService(repository OrderItemRepository, logger log.Logger) OrderItemService {
 	return &orderItemService{
 		repository: repository,
 		logger:     logger,

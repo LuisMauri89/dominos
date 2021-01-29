@@ -10,7 +10,6 @@ import (
 
 	"dominos.com/orders"
 	"dominos.com/orders/models"
-	"dominos.com/orders/repositories"
 	"dominos.com/orders/server"
 	"dominos.com/orders/services"
 	"github.com/go-kit/kit/log"
@@ -39,17 +38,17 @@ func main() {
 	conn.DB.AutoMigrate(&models.Order{})
 	conn.DB.AutoMigrate(&models.OrderItem{})
 
-	orderRepository := repositories.NewOrderRepository(conn)
+	orderRepository := services.NewOrderRepository(conn)
+	tlogger := orders.NewLogService(logger)
 	var orderService services.OrderService
 	{
 		orderService = services.NewOrderService(orderRepository, logger)
-		// orderService = logs.NewLoggingTraceLogServiceMiddleware(logger)(tlogsService)
+		orderService = services.NewLoggingOrderServiceMiddleware(logger, tlogger)(orderService)
 	}
-	orderItemRepository := repositories.NewOrderItemRepository(conn)
+	orderItemRepository := services.NewOrderItemRepository(conn)
 	var orderItemService services.OrderItemService
 	{
 		orderItemService = services.NewOrderItemService(orderItemRepository, logger)
-		// orderService = logs.NewLoggingTraceLogServiceMiddleware(logger)(tlogsService)
 	}
 	httpHandler := server.MakeHTTPHandler(orderService, orderItemService, logger)
 
