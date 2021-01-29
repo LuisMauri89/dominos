@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"net/http"
@@ -8,14 +9,14 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/dominos/logs"
+	"github.com/dominos/deliveries"
 	"github.com/go-kit/kit/log"
 	"github.com/joho/godotenv"
 )
 
 func main() {
 	var (
-		httpAddr = flag.String("port", ":8080", "HTTP listen address")
+		httpAddr = flag.String("port", ":8082", "HTTP listen address")
 	)
 	flag.Parse()
 
@@ -31,15 +32,33 @@ func main() {
 		panic("missing os environment vars.")
 	}
 
-	conn := logs.NewConnection(os.Getenv("LOGS_DB_USERNAME"), os.Getenv("LOGS_DB_PASSWORD"), os.Getenv("LOGS_DB_NAME"), logger)
+	conn := deliveries.NewConnection(os.Getenv("DELIVERIES_DB_USERNAME"), os.Getenv("DELIVERIES_DB_PASSWORD"), os.Getenv("DELIVERIES_DB_NAME"), logger)
 	defer conn.DB.Close()
-	tlogsepository := logs.NewTraceLogRepository(conn)
-	var tlogsService logs.TraceLogService
+	dRepository := deliveries.NewDeliveryRepository(conn)
+	tlogger := deliveries.NewLogService(logger)
+	var dService deliveries.DeliveryService
 	{
-		tlogsService = logs.NewTraceLogService(tlogsepository, logger)
-		tlogsService = logs.NewLoggingTraceLogServiceMiddleware(logger)(tlogsService)
+		dService = deliveries.NewDeliveryService(dRepository, logger, tlogger)
+		dService = deliveries.NewLoggingDeliveryMiddleware(logger)(dService)
 	}
-	httpHandler := logs.MakeHTTPHandler(tlogsService, logger)
+	httpHandler := deliveries.MakeHTTPHandler(dService, logger)
+
+	listener := make(chan deliveries.Payload)
+	kafkaService := deliveries.NewKafkaService()
+	kafkaService.StartKafkaListener(context.Background(), listener)
+	logger.Log("kafka listener", "starting in goroutine...")
+	go func() {
+		for p := range listener {
+			dService.Create(context.Background(), deliveries.Delivery{
+				OrderID:     p.ID,
+				Status:      "PENDING",
+				Name:        p.Name,
+				FinalPrice:  p.TotalPrice,
+				Address:     p.Address,
+				Description: "Products description...",
+			})
+		}
+	}()
 
 	errors := make(chan error)
 	go func() {

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"fmt"
 	"net/http"
@@ -54,14 +53,14 @@ func main() {
 	}
 	httpHandler := server.MakeHTTPHandler(orderService, orderItemService, logger)
 
-	listener := make(chan services.Payload)
+	/* listener := make(chan services.Payload)
 	services.StartKafkaListener(context.Background(), listener)
 	logger.Log("kafka listener", "starting in goroutine...")
 	go func() {
 		for p := range listener {
 			logger.Log("listen:", p.Name)
 		}
-	}()
+	}() */
 
 	errors := make(chan error)
 	go func() {

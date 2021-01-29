@@ -14,7 +14,7 @@ type loggingDeliveryServiceMiddleware struct {
 	logger log.Logger
 }
 
-func NewLoggingDeliveryServiceMiddleware(logger log.Logger) LoggingDeliveryServiceMiddleware {
+func NewLoggingDeliveryMiddleware(logger log.Logger) LoggingDeliveryServiceMiddleware {
 	return func(next DeliveryService) DeliveryService {
 		return &loggingDeliveryServiceMiddleware{next, logger}
 	}
@@ -32,16 +32,4 @@ func (mw *loggingDeliveryServiceMiddleware) Create(ctx context.Context, td Deliv
 		mw.logger.Log("method", "CreateTDely", "took", time.Since(begin))
 	}(time.Now())
 	return mw.DeliveryService.Create(ctx, td)
-}
-func (mw *loggingDeliveryServiceMiddleware) Delete(ctx context.Context, td Delivery) error {
-	defer func(begin time.Time) {
-		mw.logger.Log("method", "DeleteTDely", "took", time.Since(begin))
-	}(time.Now())
-	return mw.DeliveryService.Delete(ctx, td)
-}
-func (mw *loggingDeliveryServiceMiddleware) Update(ctx context.Context, td Delivery) error {
-	defer func(begin time.Time) {
-		mw.logger.Log("method", "UpdateTDely", "took", time.Since(begin))
-	}(time.Now())
-	return mw.DeliveryService.Update(ctx, td)
 }

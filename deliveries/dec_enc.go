@@ -10,7 +10,6 @@ import (
 // DecodersEncoders - holds the necesary functions to decode encode requests and responses.
 type DecodersEncoders struct {
 	FindAllDecoder func(ctx context.Context, r *http.Request) (request interface{}, err error)
-	CreateDecoder  func(ctx context.Context, r *http.Request) (request interface{}, err error)
 	Encoder        func(ctx context.Context, w http.ResponseWriter, response interface{}) error
 	ErrorEncoder   func(ctx context.Context, err error, w http.ResponseWriter)
 }
@@ -19,21 +18,13 @@ type DecodersEncoders struct {
 func GetDecodersEncoders() DecodersEncoders {
 	return DecodersEncoders{
 		FindAllDecoder: decodeFindAllRequest,
-		CreateDecoder:  decodeCreateRequest,
 		Encoder:        encodeResponse,
+		ErrorEncoder:   encodeError,
 	}
 }
 
 func decodeFindAllRequest(_ context.Context, r *http.Request) (request interface{}, err error) {
 	return FindAllRequest{}, nil
-}
-
-func decodeCreateRequest(_ context.Context, r *http.Request) (request interface{}, err error) {
-	var req CreateRequest
-	if e := json.NewDecoder(r.Body).Decode(&req.td); e != nil {
-		return nil, e
-	}
-	return req, nil
 }
 
 func encodeResponse(ctx context.Context, w http.ResponseWriter, response interface{}) error {
@@ -45,7 +36,6 @@ func encodeResponse(ctx context.Context, w http.ResponseWriter, response interfa
 	return json.NewEncoder(w).Encode(response)
 }
 
-// EncodeError - encodes error for http compatibility and readability.
 func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 	if err == nil {
 		panic("nil error - can not encode nil error.")

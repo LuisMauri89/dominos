@@ -12,7 +12,7 @@ var (
 	ErrNotFound        = errors.New("not found")
 )
 
-type DeliveryRepository struct {
+type deliveryRepository struct {
 	mtx  sync.RWMutex
 	conn Connection
 }
@@ -26,7 +26,7 @@ func NewDeliveryRepository(conn Connection) DeliveryRepository {
 func (r *deliveryRepository) FindAll(ctx context.Context) ([]Delivery, error) {
 	r.mtx.RLock()
 	defer r.mtx.RUnlock()
-	rows, err := r.conn.DB.Query("SELECT id, orderId, status, to, finalPrice,address,description FROM tDely")
+	rows, err := r.conn.DB.Query("SELECT id, order_id, status, name, final_price, address, description FROM deliveries")
 
 	if err != nil {
 		return nil, err
@@ -34,15 +34,34 @@ func (r *deliveryRepository) FindAll(ctx context.Context) ([]Delivery, error) {
 
 	defer rows.Close()
 
-	tDely := []Delivery{}
+	deliveries := []Delivery{}
 
 	for rows.Next() {
-		var td Delivery
-		if err := rows.Scan(&td.ID, &td.OrderId, &td.Status, &td.To, &td.FinalPrice, &td.Address, &td.Description); err != nil {
+		var d Delivery
+		if err := rows.Scan(&d.ID, &d.OrderID, &d.Status, &d.Name, &d.FinalPrice, &d.Address, &d.Description); err != nil {
 			return nil, err
 		}
-		tDely = append(tDely, td)
+		deliveries = append(deliveries, d)
 	}
 
-	return tDely, nil
+	return deliveries, nil
+}
+
+func (r *deliveryRepository) Create(ctx context.Context, delivery Delivery) error {
+	r.mtx.Lock()
+	defer r.mtx.Unlock()
+	err := r.conn.DB.QueryRow("INSERT INTO deliveries(id, order_id, status, name, final_price, address, description) VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING id",
+		delivery.ID,
+		delivery.OrderID,
+		delivery.Status,
+		delivery.Name,
+		delivery.FinalPrice,
+		delivery.Address,
+		delivery.Description).Scan(&delivery.ID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

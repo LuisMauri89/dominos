@@ -1,51 +1,52 @@
 package deliveries
 
 import (
-	"net/http"
+	"context"
 
 	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/transport"
-	httptransport "github.com/go-kit/kit/transport/http"
-	"github.com/gorilla/mux"
+	"github.com/gofrs/uuid"
 )
 
-type errorer interface {
-	error() error
+type deliveryService struct {
+	repository DeliveryRepository
+	logger     log.Logger
+	tlogger    LogsService
 }
 
-// MakeHTTPHandler -
-func MakeHTTPHandler(s TraceLogService, logger log.Logger) http.Handler {
-	router := mux.NewRouter()
-	endpoints := MakeEndpoints(s)
-	decodeEncoders := GetDecodersEncoders()
-	options := []httptransport.ServerOption{
-		httptransport.ServerErrorHandler(transport.NewLogErrorHandler(logger)),
-		httptransport.ServerErrorEncoder(decodeEncoders.ErrorEncoder),
+func NewDeliveryService(repository DeliveryRepository, logger log.Logger, tlogger LogsService) DeliveryService {
+	return &deliveryService{
+		repository: repository,
+		logger:     logger,
+		tlogger:    tlogger,
 	}
+}
 
-	router.Methods("GET").Path("/tdely/").Handler(httptransport.NewServer(
-		endpoints.FindAllEndpoint,
-		decodeEncoders.FindAllDecoder,
-		decodeEncoders.Encoder,
-		options...,
-	))
-	router.Methods("POST").Path("/tdely/").Handler(httptransport.NewServer(
-		endpoints.CreateEndpoint,
-		decodeEncoders.CreateDecoder,
-		decodeEncoders.Encoder,
-		options...,
-	))
-	router.Methods("DELETE").Path("/tdely/").Handler(httptransport.NewServer(
-		endpoints.DeleteEndpoint,
-		decodeEncoders.DeleteDecoder,
-		decodeEncoders.Encoder,
-		options...,
-	))
-	router.Methods("PUT").Path("/tdely/").Handler(httptransport.NewServer(
-		endpoints.UpdateEndpoint,
-		decodeEncoders.UpdateDecoder,
-		decodeEncoders.Encoder,
-		options...,
-	))
-	return router
+func (s *deliveryService) FindAll(ctx context.Context) ([]Delivery, error) {
+	deliveries, err := s.repository.FindAll(ctx)
+	if err != nil {
+		s.logger.Log("error:", err)
+		return nil, err
+	}
+	s.logger.Log("findall:", "success")
+	return deliveries, nil
+}
+
+func (s *deliveryService) Create(ctx context.Context, delivery Delivery) error {
+	uuid, _ := uuid.NewV4()
+	id := uuid.String()
+	delivery.ID = id
+
+	if err := s.repository.Create(ctx, delivery); err != nil {
+		s.logger.Log("error:", err)
+		return err
+	}
+	s.logger.Log("create:", "success")
+
+	go s.tlogger.SaveLog(TLog{
+		ServiceName: "DELIVERIES",
+		Caller:      "Delivery->Create",
+		Event:       "POST",
+		Extra:       "Create new delivery.",
+	})
+	return nil
 }
