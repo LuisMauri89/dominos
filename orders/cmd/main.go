@@ -40,9 +40,10 @@ func main() {
 
 	orderRepository := services.NewOrderRepository(conn)
 	tlogger := orders.NewLogService(logger)
+	kafkaService := services.NewKafkaService()
 	var orderService services.OrderService
 	{
-		orderService = services.NewOrderService(orderRepository, logger)
+		orderService = services.NewOrderService(orderRepository, logger, kafkaService)
 		orderService = services.NewLoggingOrderServiceMiddleware(logger, tlogger)(orderService)
 	}
 	orderItemRepository := services.NewOrderItemRepository(conn)

@@ -8,14 +8,16 @@ import (
 )
 
 type orderService struct {
-	repository OrderRepository
-	logger     log.Logger
+	repository   OrderRepository
+	logger       log.Logger
+	kafkaService KafkaService
 }
 
-func NewOrderService(repository OrderRepository, logger log.Logger) OrderService {
+func NewOrderService(repository OrderRepository, logger log.Logger, kafkaService KafkaService) OrderService {
 	return &orderService{
-		repository: repository,
-		logger:     logger,
+		repository:   repository,
+		logger:       logger,
+		kafkaService: kafkaService,
 	}
 }
 
@@ -64,6 +66,15 @@ func (s *orderService) Create(ctx context.Context, order models.Order) error {
 		return err
 	}
 	s.logger.Log("create:", "success")
+
+	payload := Payload{
+		ID:         order.ID,
+		Name:       order.Name,
+		Address:    order.Address,
+		TotalPrice: order.TotalPrice,
+		Action:     "NEW",
+	}
+	s.kafkaService.ProduceOrderAction(payload)
 	return nil
 }
 
