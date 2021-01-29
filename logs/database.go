@@ -25,5 +25,6 @@ func NewConnection(user, password, dbname string, logger log.Logger) Connection 
 		panic(err)
 	}
 
+	logger.Log("Database", "connected")
 	return Connection{DB: connection}
 }

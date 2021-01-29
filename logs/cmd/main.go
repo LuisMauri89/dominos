@@ -15,7 +15,7 @@ import (
 
 func main() {
 	var (
-		httpAddr = flag.String("port", ":8080", "HTTP listen address")
+		httpAddr = flag.String("port", ":8081", "HTTP listen address")
 	)
 	flag.Parse()
 
@@ -33,10 +33,10 @@ func main() {
 
 	conn := logs.NewConnection(os.Getenv("LOGS_DB_USERNAME"), os.Getenv("LOGS_DB_PASSWORD"), os.Getenv("LOGS_DB_NAME"), logger)
 	defer conn.DB.Close()
-	tlogsepository := logs.NewTraceLogRepository(conn)
+	tlogsRepository := logs.NewTraceLogRepository(conn)
 	var tlogsService logs.TraceLogService
 	{
-		tlogsService = logs.NewTraceLogService(tlogsepository, logger)
+		tlogsService = logs.NewTraceLogService(tlogsRepository, logger)
 		tlogsService = logs.NewLoggingTraceLogServiceMiddleware(logger)(tlogsService)
 	}
 	httpHandler := logs.MakeHTTPHandler(tlogsService, logger)

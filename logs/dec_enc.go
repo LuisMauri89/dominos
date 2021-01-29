@@ -21,6 +21,7 @@ func GetDecodersEncoders() DecodersEncoders {
 		FindAllDecoder: decodeFindAllRequest,
 		CreateDecoder:  decodeCreateRequest,
 		Encoder:        encodeResponse,
+		ErrorEncoder:   encodeError,
 	}
 }
 
