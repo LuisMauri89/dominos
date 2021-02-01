@@ -36,5 +36,12 @@ func MakeHTTPHandler(s DeliveryService, logger log.Logger) http.Handler {
 		decodeEncoders.Encoder,
 		options...,
 	))
+
+	router.Methods("GET").Path("/dely/{status}").Handler(httptransport.NewServer(
+		endpoints.GetByStatusEndpoint,
+		decodeEncoders.GetByStatusDecoder,
+		decodeEncoders.Encoder,
+		options...,
+	))
 	return router
 }

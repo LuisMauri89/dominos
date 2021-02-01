@@ -65,3 +65,26 @@ func (r *deliveryRepository) Create(ctx context.Context, delivery Delivery) erro
 
 	return nil
 }
+func (r *deliveryRepository) GetByStatus(ctx context.Context) ([]Delivery, error) {
+	r.mtx.RLock()
+	defer r.mtx.RUnlock()
+	rows, err := r.conn.DB.Query("SELECT id, order_id, status, name, final_price, address, description FROM deliveries WHERE status=PENDING")
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	deliveries := []Delivery{}
+
+	for rows.Next() {
+		var d Delivery
+		if err := rows.Scan(&d.ID, &d.OrderID, &d.Status, &d.Name, &d.FinalPrice, &d.Address, &d.Description); err != nil {
+			return nil, err
+		}
+		deliveries = append(deliveries, d)
+	}
+
+	return deliveries, nil
+}
