@@ -16,6 +16,7 @@ type errorer interface {
 func MakeHTTPHandler(s DeliveryService, logger log.Logger) http.Handler {
 	router := mux.NewRouter()
 	endpoints := MakeEndpoints(s)
+	decodeEncodersOrder := GetDecodersEncodersOrder()
 	decodeEncoders := GetDecodersEncoders()
 	options := []httptransport.ServerOption{
 		httptransport.ServerErrorHandler(transport.NewLogErrorHandler(logger)),
@@ -25,6 +26,13 @@ func MakeHTTPHandler(s DeliveryService, logger log.Logger) http.Handler {
 	router.Methods("GET").Path("/dely/").Handler(httptransport.NewServer(
 		endpoints.FindAllEndpoint,
 		decodeEncoders.FindAllDecoder,
+		decodeEncoders.Encoder,
+		options...,
+	))
+
+	router.Methods("POST").Path("/dely/").Handler(httptransport.NewServer(
+		endpoints.CreateOrderEndpoint,
+		decodeEncoders.CreateOrderDecoder,
 		decodeEncoders.Encoder,
 		options...,
 	))
