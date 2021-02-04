@@ -32,7 +32,7 @@ func MakeHTTPHandler(s DeliveryService, logger log.Logger) http.Handler {
 
 	router.Methods("POST").Path("/dely/").Handler(httptransport.NewServer(
 		endpoints.CreateOrderEndpoint,
-		decodeEncoders.CreateOrderDecoder,
+		decodeEncoders.CreateOrderRequest,
 		decodeEncoders.Encoder,
 		options...,
 	))

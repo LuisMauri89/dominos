@@ -34,7 +34,7 @@ func (mw *loggingDeliveryServiceMiddleware) Create(ctx context.Context, td Deliv
 	return mw.DeliveryService.Create(ctx, td)
 }
 
-func (mw *loggingDeliveryServiceMiddleware) GetByStatus(ctx context.Context, status string) (Delivery, error) {
+func (mw *loggingDeliveryServiceMiddleware) GetByStatus(ctx context.Context) ([]Delivery, error) {
 	defer func(begin time.Time) {
 		mw.logger.Log("method", "GetByStatus", "took", time.Since(begin))
 	}(time.Now())

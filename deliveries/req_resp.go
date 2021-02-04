@@ -1,5 +1,7 @@
 package deliveries
 
+import "github.com/KingDiegoA/dominos/orders/models"
+
 type FindAllRequest struct {
 }
 

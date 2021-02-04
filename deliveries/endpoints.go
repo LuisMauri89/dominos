@@ -29,14 +29,14 @@ func makeFindAllEndpoint(s DeliveryService) endpoint.Endpoint {
 func makeCreateOrderEndpoint(s DeliveryService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(CreateOrderRequest)
-		e := s.Create(ctx, req.order)
+		e := s.Create(ctx, req.Delivery)
 		return CreateOrderResponse{Err: e}, nil
 	}
 }
 func makeGetByStatusEndpoint(s DeliveryService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		req := request.(GetBySatusRequest)
-		deliveries, e := os.GetByID(ctx, req.status)
+		req := request.(GetByStatusRequest)
+		deliveries, e := os.GetByStatus(ctx, req.Status)
 		return GetByStatusResponse{Order: order, Err: e}, nil
 	}
 }
